@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="soap-api">
+    <output-path>$PROJECT_DIR$/out/artifacts/soap_api</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="hw_api_soap/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="hw_api_soap" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="application" name="com.github.sjitech:qj-rethinkdb-driver:2.3.0" />
+          <element id="library" level="project" name="JAX-WS-Glassfish / JAX-WS 2.2 RI / Metro 1.X / JWSDP 2.2" />
+          <element id="library" level="application" name="com.google.code.gson:gson:2.8.2" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

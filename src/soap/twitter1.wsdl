@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+	xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+	xmlns:tns="http://veebiteenused.ttu.ee"
+	targetNamespace="http://veebiteenused.ttu.ee">
+	<wsdl:types>
+		<xs:schema  targetNamespace="http://veebiteenused.ttu.ee" elementFormDefault="qualified">
+            <xs:simpleType name="TweetMessage">
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="144"/>
+                    <xs:minLength value="1"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="Tweet">
+                <xs:sequence>
+                    <xs:element name="Message" type="tns:TweetMessage"/>
+                    <xs:element name="OwnerID" type="xs:string"/>
+                    <xs:element name="ID" type="xs:string"/>
+                    <xs:element name="CreationDate" type="xs:dateTime"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="Comment">
+                <xs:complexContent>
+                    <xs:extension base="tns:Tweet">
+                        <xs:sequence>
+                            <xs:element name="TweetID" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="TweetWithComments">
+                <xs:complexContent>
+                    <xs:extension base="tns:Tweet">
+                        <xs:sequence>
+                            <xs:element name="Comments">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Comment" type="tns:Comment" minOccurs="0" maxOccurs="unbounded"/>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+			<xs:element name="GetTweetRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="ID" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetTweetResponse" type="tns:Tweet"/>
+			<xs:element name="AddTweetRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="Message" type="tns:TweetMessage"/>
+						<xs:element name="OwnerID" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddTweetResponse" type="tns:Tweet"/>
+			<xs:element name="GetCommentRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+						<xs:element name="CommentID" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetCommentResponse" type="tns:Comment"/>
+			<xs:element name="GetTweetsRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="UserID" type="xs:string"/>
+                        <xs:element name="StartDate" type="xs:date" minOccurs="0"/>
+                        <xs:element name="EndDate" type="xs:date" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetTweetsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Tweets" maxOccurs="unbounded" type="tns:Tweet"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetCommentsRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="UserID" type="xs:string"/>
+                        <xs:element name="StartDate" type="xs:date" minOccurs="0"/>
+                        <xs:element name="EndDate" type="xs:date" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetCommentsResponse">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Comments">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Comment" maxOccurs="unbounded" type="tns:Comment"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddCommentToTweetRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="Message" type="tns:TweetMessage"/>
+						<xs:element name="OwnerID" type="xs:string"/>
+						<xs:element name="TweetID" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddCommentToTweetResponse" type="tns:TweetWithComments"/>
+			<xs:element name="GetTweetCommentsRequest">
+				<xs:complexType>
+					<xs:sequence>
+                        <xs:element name="Token" type="xs:string"/>
+                        <xs:element name="TweetID" type="xs:string"/>
+                    </xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetTweetCommentsResponse" type="tns:TweetWithComments"/>
+		</xs:schema>
+	</wsdl:types>
+	<!--Get Tweet-->
+	<wsdl:message name="GetTweetRequest">
+		<wsdl:part name="parameter" element="tns:GetTweetRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetTweetResponse">
+		<wsdl:part name="parameter" element="tns:GetTweetResponse"/>
+	</wsdl:message>
+
+	<!--Add Tweet-->
+	<wsdl:message name="AddTweetRequest">
+		<wsdl:part name="parameter" element="tns:AddTweetRequest"/>
+	</wsdl:message>
+	<wsdl:message name="AddTweetResponse">
+		<wsdl:part name="parameter" element="tns:AddTweetResponse"/>
+	</wsdl:message>
+
+	<!--Get Comment-->
+	<wsdl:message name="GetCommentRequest">
+		<wsdl:part name="parameter" element="tns:GetCommentRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetCommentResponse">
+		<wsdl:part name="parameter" element="tns:GetCommentResponse"/>
+	</wsdl:message>
+
+	<!--Get Tweets List-->
+	<wsdl:message name="GetTweetsRequest">
+		<wsdl:part name="parameter" element="tns:GetTweetsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetTweetsResponse">
+		<wsdl:part name="parameter" element="tns:GetTweetsResponse"/>
+	</wsdl:message>
+
+	<!--Get Comments List-->
+	<wsdl:message name="GetCommentsRequest">
+		<wsdl:part name="parameter" element="tns:GetCommentsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetCommentsResponse">
+		<wsdl:part name="parameter" element="tns:GetCommentsResponse"/>
+	</wsdl:message>
+
+	<!--Add Comment To Tweet-->
+	<wsdl:message name="AddCommentToTweetRequest">
+		<wsdl:part name="parameter" element="tns:AddCommentToTweetRequest"/>
+	</wsdl:message>
+	<wsdl:message name="AddCommentToTweetResponse">
+		<wsdl:part name="parameter" element="tns:AddCommentToTweetResponse"/>
+	</wsdl:message>
+
+	<!--Get Tweet Comment-->
+	<wsdl:message name="GetTweetCommentsRequest">
+		<wsdl:part name="parameter" element="tns:GetTweetCommentsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetTweetCommentsResponse">
+		<wsdl:part name="parameter" element="tns:GetTweetCommentsResponse"/>
+	</wsdl:message>
+
+	<wsdl:portType name="TwitterPortType">
+		<wsdl:operation name="GetTweet">
+			<wsdl:input message="tns:GetTweetRequest"/>
+			<wsdl:output message="tns:GetTweetResponse"/>
+		</wsdl:operation>
+        <wsdl:operation name="AddTweet">
+            <wsdl:input message="tns:AddTweetRequest"/>
+            <wsdl:output message="tns:AddTweetResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetComment">
+            <wsdl:input message="tns:GetCommentRequest"/>
+            <wsdl:output message="tns:GetCommentResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetTweets">
+            <wsdl:input message="tns:GetTweetsRequest"/>
+            <wsdl:output message="tns:GetTweetsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetComments">
+            <wsdl:input message="tns:GetCommentsRequest"/>
+            <wsdl:output message="tns:GetCommentsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="AddCommentToTweet">
+            <wsdl:input message="tns:AddCommentToTweetRequest"/>
+            <wsdl:output message="tns:AddCommentToTweetResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetTweetComments">
+            <wsdl:input message="tns:GetTweetCommentsRequest"/>
+            <wsdl:output message="tns:GetTweetCommentsResponse"/>
+        </wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="TwitterBinding" type="tns:TwitterPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="GetTweet">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+        <wsdl:operation name="AddTweet">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetComment">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetTweets">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetComments">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="AddCommentToTweet">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetTweetComments">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="TwitterService">
+		<wsdl:port name="TwitterPort" binding="tns:TwitterBinding">
+			<soap:address location="Empty"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
