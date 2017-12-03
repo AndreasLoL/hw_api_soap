@@ -1,11 +1,9 @@
 
 package soap;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import service.TwitterService;
+
 import com.google.gson.JsonElement;
-import com.rethinkdb.RethinkDB;
-import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
 
 import javax.jws.WebMethod;
@@ -19,7 +17,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.Endpoint;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -37,19 +34,10 @@ import java.util.List;
 })
 public class TwitterPortType {
 
-
-    public static final RethinkDB r = RethinkDB.r;
-    public static Connection conn;
-    public List<String> tokens;
-    public Gson gson;
+    TwitterService service;
 
     public TwitterPortType() {
-        conn = r.connection().hostname("localhost").port(28015).connect();
-        tokens = new ArrayList<>(Arrays.asList("asd123", "abc123", "qwerty"));
-        gson = new GsonBuilder()
-                .registerTypeAdapter(XMLGregorianCalendar.class, new XMLGregorianCalendarConverter.Deserializer())
-                .registerTypeAdapter(XMLGregorianCalendar.class, new XMLGregorianCalendarConverter.Serializer())
-                .create();
+        service = new TwitterService();
     }
 
     /**
@@ -64,18 +52,7 @@ public class TwitterPortType {
         @WebParam(name = "GetTweetRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetTweetRequest parameter) {
 
-        if (tokenIsValid(parameter.getToken())) {
-            Cursor c = r.db("twitter").table("tweet").filter(r.hashMap("id", parameter.getID())).run(conn);
-            for (Object tweet : c) {
-                JsonElement jsonElement = gson.toJsonTree(tweet);
-                return gson.fromJson(jsonElement, Tweet.class);
-            }
-        }
-        return null;
-    }
-
-    private boolean tokenIsValid(String token) {
-        return tokens.contains(token);
+        return service.getTweet(parameter.token, parameter.getID());
     }
 
     /**
@@ -89,37 +66,8 @@ public class TwitterPortType {
     public Tweet addTweet(
         @WebParam(name = "AddTweetRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         AddTweetRequest parameter) {
-        //User: 83b33b97-a449-42d2-a36b-7bab1201b014
 
-
-        if (tokenIsValid(parameter.getToken())) {
-            r.db("twitter").table("tweet").insert(r.array(
-                    r.hashMap("message", parameter.getMessage())
-                            .with("ownerID", parameter.getOwnerID())
-                            .with("creationDate", getCurrentDate().toString())
-            )).run(conn);
-
-            Tweet tweet = new Tweet();
-            tweet.setCreationDate(getCurrentDate());
-            tweet.setMessage(parameter.getMessage());
-            tweet.setOwnerID(parameter.getOwnerID());
-            return tweet;
-        }
-
-        return null;
-    }
-
-    private XMLGregorianCalendar getCurrentDate() {
-        try {
-            GregorianCalendar gregorianCalendar = new GregorianCalendar();
-            DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-            XMLGregorianCalendar now =
-                    datatypeFactory.newXMLGregorianCalendar(gregorianCalendar);
-            return now;
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return service.addTweet(parameter.getToken(), parameter.getMessage(), parameter.getOwnerID());
     }
 
     /**
@@ -134,14 +82,7 @@ public class TwitterPortType {
         @WebParam(name = "GetCommentRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetCommentRequest parameter) {
 
-        if (tokenIsValid(parameter.getToken())) {
-            Cursor c = r.db("twitter").table("comment").filter(r.hashMap("id", parameter.getCommentID())).run(conn);
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                return gson.fromJson(jsonElement, Comment.class);
-            }
-        }
-        return null;
+        return service.getComment(parameter.getToken(), parameter.getCommentID());
     }
 
     /**
@@ -156,19 +97,12 @@ public class TwitterPortType {
         @WebParam(name = "GetTweetsRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetTweetsRequest parameter) {
 
-        if (tokenIsValid(parameter.getToken())) {
-            List<Tweet> tweets = new ArrayList<>();
-            Cursor c = r.db("twitter").table("tweet").run(conn);
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                tweets.add(gson.fromJson(jsonElement, Tweet.class));
-            }
-            GetTweetsResponse response = new GetTweetsResponse();
-            response.tweets = tweets;
-            return response;
-        }
+        List<Tweet> tweets = service.getTweets(parameter.getToken());
 
-        return null;
+        GetTweetsResponse response = new GetTweetsResponse();
+        response.tweets = tweets;
+
+        return response;
     }
 
     /**
@@ -183,20 +117,13 @@ public class TwitterPortType {
         @WebParam(name = "GetCommentsRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetCommentsRequest parameter) {
 
-        if (tokenIsValid(parameter.getToken())) {
-            List<Comment> comments = new ArrayList<>();
-            Cursor c = r.db("twitter").table("comment").filter(r.hashMap("ownerID", parameter.getUserID())).run(conn);
+        List<Comment> comments = service.getComments(parameter.getToken(), parameter.getUserID());
 
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                comments.add(gson.fromJson(jsonElement, Comment.class));
-            }
-            GetCommentsResponse response = new GetCommentsResponse();
-            response.comments.comment = comments;
-            return response;
-        }
+        GetCommentsResponse response = new GetCommentsResponse();
+        response.comments = new GetCommentsResponse.Comments();
+        response.comments.comment = comments;
 
-        return null;
+        return response;
     }
 
     /**
@@ -210,40 +137,8 @@ public class TwitterPortType {
     public TweetWithComments addCommentToTweet(
         @WebParam(name = "AddCommentToTweetRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         AddCommentToTweetRequest parameter) {
-        if (tokenIsValid(parameter.getToken())) {
-            r.db("twitter").table("comment").insert(r.array(
-                    r.hashMap("message", parameter.getMessage())
-                            .with("ownerID", parameter.getOwnerID())
-                            .with("creationDate", getCurrentDate().toString())
-                    .with("tweetID", parameter.getTweetID())
-            )).run(conn);
 
-
-            GetTweetRequest getTweetRequest = new GetTweetRequest();
-            getTweetRequest.setID(parameter.getTweetID());
-            getTweetRequest.setToken(parameter.getToken());
-            Tweet tweet = getTweet(getTweetRequest);
-
-            List<Comment> comments = new ArrayList<>();
-            Cursor c = r.db("twitter").table("comment").filter(r.hashMap("tweetID", parameter.getTweetID())).run(conn);
-
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                comments.add(gson.fromJson(jsonElement, Comment.class));
-            }
-
-            TweetWithComments tweetWithComments = new TweetWithComments();
-            tweetWithComments.comments = new TweetWithComments.Comments();
-            tweetWithComments.comments.comment = comments;
-            tweetWithComments.creationDate = tweet.getCreationDate();
-            tweetWithComments.message = tweet.getMessage();
-            tweetWithComments.ownerID = tweet.getOwnerID();
-            tweetWithComments.id = tweet.getID();
-
-            return tweetWithComments;
-        }
-
-        return null;
+        return service.addCommentToTweet(parameter.getToken(), parameter.getMessage(), parameter.getOwnerID(), parameter.getTweetID());
     }
 
     /**
@@ -258,32 +153,7 @@ public class TwitterPortType {
         @WebParam(name = "GetTweetCommentsRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetTweetCommentsRequest parameter) {
 
-        if (tokenIsValid(parameter.getToken())) {
-            GetTweetRequest getTweetRequest = new GetTweetRequest();
-            getTweetRequest.setID(parameter.getTweetID());
-            getTweetRequest.setToken(parameter.getToken());
-            Tweet tweet = getTweet(getTweetRequest);
-
-            List<Comment> comments = new ArrayList<>();
-            Cursor c = r.db("twitter").table("comment").filter(r.hashMap("tweetID", parameter.getTweetID())).run(conn);
-
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                comments.add(gson.fromJson(jsonElement, Comment.class));
-            }
-
-            TweetWithComments tweetWithComments = new TweetWithComments();
-            tweetWithComments.comments = new TweetWithComments.Comments();
-            tweetWithComments.comments.comment = comments;
-            tweetWithComments.creationDate = tweet.getCreationDate();
-            tweetWithComments.message = tweet.getMessage();
-            tweetWithComments.ownerID = tweet.getOwnerID();
-            tweetWithComments.id = tweet.getID();
-
-            return tweetWithComments;
-        }
-
-        return null;
+        return service.getTweetComments(parameter.getToken(), parameter.getTweetID());
     }
 
     public static void main(String[] args) {

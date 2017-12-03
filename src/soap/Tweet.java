@@ -46,14 +46,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class Tweet {
 
     @XmlElement(name = "Message", required = true)
-    protected String message;
+    public String message;
     @XmlElement(name = "OwnerID", required = true)
-    protected String ownerID;
+    public String ownerID;
     @XmlElement(name = "ID", required = true)
-    protected String id;
+    public String id;
     @XmlElement(name = "CreationDate", required = true)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar creationDate;
+    public XMLGregorianCalendar creationDate;
 
     /**
      * Gets the value of the message property.
