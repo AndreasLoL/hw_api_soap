@@ -13,10 +13,8 @@ import utils.XMLGregorianCalendarConverter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Created by ANDREAS on 03.12.2017.
@@ -111,15 +109,24 @@ public class TwitterService {
     }
 
 
-    public List<Tweet> getTweets(String token) {
+    public List<Tweet> getTweets(String token, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
         if (tokenIsValid(token)) {
             Connection conn = connBuilder.connect();
 
             List<Tweet> tweets = new ArrayList<>();
             Cursor c = r.db("twitter").table("tweet").run(conn);
-            for (Object comment : c) {
-                JsonElement jsonElement = gson.toJsonTree(comment);
-                tweets.add(gson.fromJson(jsonElement, Tweet.class));
+            for (Object tweet : c) {
+                JsonElement jsonElement = gson.toJsonTree(tweet);
+                Tweet castedTweet = gson.fromJson(jsonElement, Tweet.class);
+
+                if (bothDatesExist(startDate, endDate)) {
+                    LocalDateTime commentDate = castedTweet.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (objectIsInDateRange(startDate, endDate, commentDate)) {
+                        tweets.add(castedTweet);
+                    }
+                } else {
+                    tweets.add(castedTweet);
+                }
             }
             conn.close();
             return tweets;
@@ -128,7 +135,15 @@ public class TwitterService {
         return null;
     }
 
-    public List<Comment> getComments(String token, String userId) {
+    private boolean objectIsInDateRange(Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate, LocalDateTime commentDate) {
+        return startDate.get().isBefore(commentDate) && endDate.get().isAfter(commentDate);
+    }
+
+    private boolean bothDatesExist(Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
+        return startDate.isPresent() && endDate.isPresent();
+    }
+
+    public List<Comment> getComments(String token, String userId, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
         if (tokenIsValid(token)) {
             Connection conn = connBuilder.connect();
 
@@ -137,7 +152,16 @@ public class TwitterService {
 
             for (Object comment : c) {
                 JsonElement jsonElement = gson.toJsonTree(comment);
-                comments.add(gson.fromJson(jsonElement, Comment.class));
+                Comment castedComment = gson.fromJson(jsonElement, Comment.class);
+                if (bothDatesExist(startDate, endDate)) {
+
+                    LocalDateTime commentDate = castedComment.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (objectIsInDateRange(startDate, endDate, commentDate)) {
+                        comments.add(castedComment);
+                    }
+                } else {
+                    comments.add(castedComment);
+                }
             }
 
             conn.close();

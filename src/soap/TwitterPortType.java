@@ -19,6 +19,7 @@ import javax.xml.ws.Endpoint;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -97,7 +98,9 @@ public class TwitterPortType {
         @WebParam(name = "GetTweetsRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetTweetsRequest parameter) {
 
-        List<Tweet> tweets = service.getTweets(parameter.getToken());
+        List<Tweet> tweets = service.getTweets(parameter.getToken(),
+                Optional.of(parameter.getStartDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime()),
+                Optional.of(parameter.getEndDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime()));
 
         GetTweetsResponse response = new GetTweetsResponse();
         response.tweets = tweets;
@@ -117,7 +120,9 @@ public class TwitterPortType {
         @WebParam(name = "GetCommentsRequest", targetNamespace = "http://veebiteenused.ttu.ee", partName = "parameter")
         GetCommentsRequest parameter) {
 
-        List<Comment> comments = service.getComments(parameter.getToken(), parameter.getUserID());
+        List<Comment> comments = service.getComments(parameter.getToken(), parameter.getUserID(),
+                Optional.of(parameter.getStartDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime()),
+                Optional.of(parameter.getEndDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime()));
 
         GetCommentsResponse response = new GetCommentsResponse();
         response.comments = new GetCommentsResponse.Comments();
@@ -158,7 +163,7 @@ public class TwitterPortType {
 
     public static void main(String[] args) {
         Object implementor = new TwitterPortType();
-        String address = "http://localhost:9000/HelloWorld";
+        String address = "http://localhost:8080/HelloWorld";
         Endpoint.publish(address, implementor);
     }
 

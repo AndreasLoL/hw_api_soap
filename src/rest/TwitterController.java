@@ -7,8 +7,12 @@ import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by ANDREAS on 03.12.2017.
@@ -57,16 +61,48 @@ public class TwitterController {
     @GET
     @Path("/tweets")
     @Produces("application/json")
-    public List<Tweet> getTweets(@QueryParam("token") String token) {
-        return service.getTweets(token);
+    public List<Tweet> getTweets(@QueryParam("token") String token,
+                                 @DefaultValue("") @QueryParam("start") String startDateString,
+                                 @DefaultValue("") @QueryParam("end") String endDateString) {
+        Optional<LocalDateTime> start;
+        Optional<LocalDateTime> end;
+        if (startDateString.equals("")) {
+            start = Optional.empty();
+        } else {
+            start = Optional.of(LocalDateTime.parse(startDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+
+        if (endDateString.equals("")) {
+            end = Optional.empty();
+        } else {
+            end = Optional.of(LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+
+        return service.getTweets(token, start, end);
     }
 
 
     @GET
     @Path("/comments/{userId}")
     @Produces("application/json")
-    public List<Comment> getComments(@PathParam("userId") String userId, @QueryParam("token") String token) {
-        return service.getComments(token, userId);
+    public List<Comment> getComments(@PathParam("userId") String userId, @QueryParam("token") String token,
+                                     @DefaultValue("") @QueryParam("start") String startDateString,
+                                     @DefaultValue("") @QueryParam("end") String endDateString) {
+        Optional<LocalDateTime> start;
+        Optional<LocalDateTime> end;
+        if (startDateString.equals("")) {
+            start = Optional.empty();
+        } else {
+            start = Optional.of(LocalDateTime.parse(startDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+
+        if (endDateString.equals("")) {
+            end = Optional.empty();
+        } else {
+            end = Optional.of(LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+
+        return service.getComments(token, userId, start, end);
     }
 
     @POST

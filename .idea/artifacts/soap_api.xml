@@ -11,6 +11,8 @@
           <element id="library" level="application" name="com.github.sjitech:qj-rethinkdb-driver:2.3.0" />
           <element id="library" level="project" name="JAX-WS-Glassfish / JAX-WS 2.2 RI / Metro 1.X / JWSDP 2.2" />
           <element id="library" level="application" name="com.google.code.gson:gson:2.8.2" />
+          <element id="library" level="application" name="javax.ws.rs:javax.ws.rs-api:2.0.1" />
+          <element id="library" level="application" name="javax.enterprise:cdi-api:1.2" />
         </element>
       </element>
     </root>
