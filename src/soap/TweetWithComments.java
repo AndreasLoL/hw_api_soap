@@ -47,7 +47,7 @@ public class TweetWithComments
 {
 
     @XmlElement(name = "Comments", required = true)
-    public TweetWithComments.Comments comments;
+    protected TweetWithComments.Comments comments;
 
     /**
      * Gets the value of the comments property.
@@ -100,7 +100,7 @@ public class TweetWithComments
     public static class Comments {
 
         @XmlElement(name = "Comment")
-        public List<Comment> comment;
+        protected List<Comment> comment;
 
         /**
          * Gets the value of the comment property.

@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="Comment" type="{http://veebiteenused.ttu.ee}Comment" maxOccurs="unbounded"/>
+ *                   &lt;element name="Comment" type="{http://veebiteenused.ttu.ee}Comment" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -84,7 +84,7 @@ public class GetCommentsResponse {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="Comment" type="{http://veebiteenused.ttu.ee}Comment" maxOccurs="unbounded"/>
+     *         &lt;element name="Comment" type="{http://veebiteenused.ttu.ee}Comment" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -99,7 +99,7 @@ public class GetCommentsResponse {
     })
     public static class Comments {
 
-        @XmlElement(name = "Comment", required = true)
+        @XmlElement(name = "Comment")
         protected List<Comment> comment;
 
         /**

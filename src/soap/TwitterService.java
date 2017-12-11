@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "TwitterService", targetNamespace = "http://veebiteenused.ttu.ee", wsdlLocation = "file:/C:/Users/ANDREAS/hw_api/twitter.wsdl")
+@WebServiceClient(name = "TwitterService", targetNamespace = "http://veebiteenused.ttu.ee", wsdlLocation = "file:/C:/Users/ANDREAS/iti0050/hw_api_soap/src/soap/twitter1.wsdl")
 public class TwitterService
     extends Service
 {
@@ -30,7 +30,7 @@ public class TwitterService
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("file:/C:/Users/ANDREAS/hw_api/twitter.wsdl");
+            url = new URL("file:/C:/Users/ANDREAS/iti0050/hw_api_soap/src/soap/twitter1.wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }

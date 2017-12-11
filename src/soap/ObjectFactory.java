@@ -46,6 +46,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link GetTweetsResponse }
+     * 
+     */
+    public GetTweetsResponse createGetTweetsResponse() {
+        return new GetTweetsResponse();
+    }
+
+    /**
      * Create an instance of {@link TweetWithComments }
      * 
      */
@@ -110,11 +118,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetTweetsResponse }
+     * Create an instance of {@link GetTweetsResponse.Tweets }
      * 
      */
-    public GetTweetsResponse createGetTweetsResponse() {
-        return new GetTweetsResponse();
+    public GetTweetsResponse.Tweets createGetTweetsResponseTweets() {
+        return new GetTweetsResponse.Tweets();
     }
 
     /**

@@ -29,7 +29,6 @@ public class TwitterService {
     public Gson gson;
 
     public TwitterService() {
-        tokens = new ArrayList<>(Arrays.asList("asd123", "abc123", "qwerty"));
         connBuilder = r.connection().hostname("localhost").port(28015);
         tokens = new ArrayList<>(Arrays.asList("asd123", "abc123", "qwerty"));
         gson = new GsonBuilder()
@@ -83,6 +82,7 @@ public class TwitterService {
 
             Tweet tweet = new Tweet();
             tweet.setCreationDate(getCurrentDate());
+            tweet.setID("");
             tweet.setMessage(message);
             tweet.setOwnerID(ownerId);
 
@@ -194,12 +194,12 @@ public class TwitterService {
             }
 
             TweetWithComments tweetWithComments = new TweetWithComments();
-            tweetWithComments.comments = new TweetWithComments.Comments();
-            tweetWithComments.comments.comment = comments;
-            tweetWithComments.creationDate = tweet.getCreationDate();
-            tweetWithComments.message = tweet.getMessage();
-            tweetWithComments.ownerID = tweet.getOwnerID();
-            tweetWithComments.id = tweet.getID();
+            tweetWithComments.setComments(new TweetWithComments.Comments());
+            tweetWithComments.getComments().getComment().addAll(comments);
+            tweetWithComments.setCreationDate(tweet.getCreationDate());
+            tweetWithComments.setMessage(tweet.getMessage());
+            tweetWithComments.setOwnerID(tweet.getOwnerID());
+            tweetWithComments.setID(tweet.getID());
 
             conn.close();
             return tweetWithComments;
@@ -223,12 +223,12 @@ public class TwitterService {
             }
 
             TweetWithComments tweetWithComments = new TweetWithComments();
-            tweetWithComments.comments = new TweetWithComments.Comments();
-            tweetWithComments.comments.comment = comments;
-            tweetWithComments.creationDate = tweet.getCreationDate();
-            tweetWithComments.message = tweet.getMessage();
-            tweetWithComments.ownerID = tweet.getOwnerID();
-            tweetWithComments.id = tweet.getID();
+            tweetWithComments.setComments(new TweetWithComments.Comments());
+            tweetWithComments.getComments().getComment().addAll(comments);
+            tweetWithComments.setCreationDate(tweet.getCreationDate());
+            tweetWithComments.setMessage(tweet.getMessage());
+            tweetWithComments.setOwnerID(tweet.getOwnerID());
+            tweetWithComments.setID(tweet.getID());
 
             conn.close();
             return tweetWithComments;

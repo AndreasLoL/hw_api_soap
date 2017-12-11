@@ -22,8 +22,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *       &lt;sequence>
  *         &lt;element name="Token" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="UserID" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="StartDate" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
- *         &lt;element name="EndDate" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
+ *         &lt;element name="StartDate" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *         &lt;element name="EndDate" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -47,10 +47,10 @@ public class GetCommentsRequest {
     @XmlElement(name = "UserID", required = true)
     protected String userID;
     @XmlElement(name = "StartDate")
-    @XmlSchemaType(name = "date")
+    @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar startDate;
     @XmlElement(name = "EndDate")
-    @XmlSchemaType(name = "date")
+    @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar endDate;
 
     /**

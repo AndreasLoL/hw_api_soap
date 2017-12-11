@@ -80,15 +80,21 @@
 					<xs:sequence>
                         <xs:element name="Token" type="xs:string"/>
                         <xs:element name="UserID" type="xs:string"/>
-                        <xs:element name="StartDate" type="xs:date" minOccurs="0"/>
-                        <xs:element name="EndDate" type="xs:date" minOccurs="0"/>
+                        <xs:element name="StartDate" type="xs:dateTime" minOccurs="0"/>
+                        <xs:element name="EndDate" type="xs:dateTime" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="GetTweetsResponse">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Tweets" maxOccurs="unbounded" type="tns:Tweet"/>
+                        <xs:element name="Tweets">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Tweet" minOccurs="0" maxOccurs="unbounded" type="tns:Tweet" />
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -97,8 +103,8 @@
 					<xs:sequence>
                         <xs:element name="Token" type="xs:string"/>
                         <xs:element name="UserID" type="xs:string"/>
-                        <xs:element name="StartDate" type="xs:date" minOccurs="0"/>
-                        <xs:element name="EndDate" type="xs:date" minOccurs="0"/>
+                        <xs:element name="StartDate" type="xs:dateTime" minOccurs="0"/>
+                        <xs:element name="EndDate" type="xs:dateTime" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -108,7 +114,7 @@
                         <xs:element name="Comments">
                             <xs:complexType>
                                 <xs:sequence>
-                                    <xs:element name="Comment" maxOccurs="unbounded" type="tns:Comment"/>
+                                    <xs:element name="Comment" minOccurs="0" maxOccurs="unbounded" type="tns:Comment"/>
                                 </xs:sequence>
                             </xs:complexType>
                         </xs:element>
