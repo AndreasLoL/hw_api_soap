@@ -28,6 +28,8 @@ public class TwitterService {
     public List<String> tokens;
     public Gson gson;
 
+    public ValidationService validationService;
+
     public TwitterService() {
         connBuilder = r.connection().hostname("localhost").port(28015);
         tokens = new ArrayList<>(Arrays.asList("asd123", "abc123", "qwerty"));
@@ -35,6 +37,8 @@ public class TwitterService {
                 .registerTypeAdapter(XMLGregorianCalendar.class, new XMLGregorianCalendarConverter.Deserializer())
                 .registerTypeAdapter(XMLGregorianCalendar.class, new XMLGregorianCalendarConverter.Serializer())
                 .create();
+
+        validationService = new ValidationService();
     }
 
     private boolean tokenIsValid(String token) {
@@ -70,7 +74,7 @@ public class TwitterService {
     }
 
     public Tweet addTweet(String token, String message, String ownerId) {
-        if (tokenIsValid(token)) {
+        if (tokenIsValid(token) && validationService.tweetIsValid(message)) {
 
             Connection conn = connBuilder.connect();
 
@@ -109,19 +113,29 @@ public class TwitterService {
     }
 
 
-    public List<Tweet> getTweets(String token, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
+    public List<Tweet> getTweets(String token, String userId, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
         if (tokenIsValid(token)) {
             Connection conn = connBuilder.connect();
 
             List<Tweet> tweets = new ArrayList<>();
-            Cursor c = r.db("twitter").table("tweet").run(conn);
+            Cursor c = r.db("twitter").table("tweet").filter(r.hashMap("ownerID", userId)).run(conn);
             for (Object tweet : c) {
                 JsonElement jsonElement = gson.toJsonTree(tweet);
                 Tweet castedTweet = gson.fromJson(jsonElement, Tweet.class);
 
                 if (bothDatesExist(startDate, endDate)) {
-                    LocalDateTime commentDate = castedTweet.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
-                    if (objectIsInDateRange(startDate, endDate, commentDate)) {
+                    LocalDateTime tweetDate = castedTweet.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (objectIsInDateRange(startDate, endDate, tweetDate)) {
+                        tweets.add(castedTweet);
+                    }
+                } else if (startDate.isPresent()) {
+                    LocalDateTime tweetDate = castedTweet.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (tweetDate.isAfter(startDate.get())) {
+                        tweets.add(castedTweet);
+                    }
+                } else if (endDate.isPresent()) {
+                    LocalDateTime tweetDate = castedTweet.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (tweetDate.isBefore(endDate.get())) {
                         tweets.add(castedTweet);
                     }
                 } else {
@@ -154,12 +168,23 @@ public class TwitterService {
                 JsonElement jsonElement = gson.toJsonTree(comment);
                 Comment castedComment = gson.fromJson(jsonElement, Comment.class);
                 if (bothDatesExist(startDate, endDate)) {
-
                     LocalDateTime commentDate = castedComment.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
                     if (objectIsInDateRange(startDate, endDate, commentDate)) {
                         comments.add(castedComment);
                     }
+                } else if (startDate.isPresent()) {
+                    LocalDateTime commentDate = castedComment.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (commentDate.isAfter(startDate.get())) {
+                        comments.add(castedComment);
+                    }
+                } else if (endDate.isPresent()) {
+                    LocalDateTime commentDate = castedComment.getCreationDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+                    if (commentDate.isBefore(endDate.get())) {
+                        comments.add(castedComment);
+                    }
+
                 } else {
+                    System.out.println("Adding all");
                     comments.add(castedComment);
                 }
             }
@@ -172,8 +197,14 @@ public class TwitterService {
     }
 
     public TweetWithComments addCommentToTweet(String token, String message, String ownerId, String tweetId) {
-        if (tokenIsValid(token)) {
+        if (tokenIsValid(token) && validationService.tweetIsValid(message)) {
             Connection conn = connBuilder.connect();
+
+            Tweet tweet = getTweet(token, tweetId);
+
+            if (tweet == null) {
+                return null;
+            }
 
             r.db("twitter").table("comment").insert(r.array(
                     r.hashMap("message", message)
@@ -181,9 +212,6 @@ public class TwitterService {
                             .with("creationDate", getCurrentDate().toString())
                             .with("tweetID", tweetId)
             )).run(conn);
-
-
-            Tweet tweet = getTweet(token, tweetId);
 
             List<Comment> comments = new ArrayList<>();
             Cursor c = r.db("twitter").table("comment").filter(r.hashMap("tweetID", tweetId)).run(conn);
@@ -213,6 +241,10 @@ public class TwitterService {
             Connection conn = connBuilder.connect();
 
             Tweet tweet = getTweet(token, tweetId);
+
+            if (tweet == null) {
+                return null;
+            }
 
             List<Comment> comments = new ArrayList<>();
             Cursor c = r.db("twitter").table("comment").filter(r.hashMap("tweetID", tweetId)).run(conn);

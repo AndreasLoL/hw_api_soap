@@ -59,11 +59,12 @@ public class TwitterController {
     }
 
     @GET
-    @Path("/tweets")
+    @Path("/tweets/{userId}")
     @Produces("application/json")
-    public List<Tweet> getTweets(@QueryParam("token") String token,
+    public List<Tweet> getTweets(@PathParam("userId") String userId, @QueryParam("token") String token,
                                  @DefaultValue("") @QueryParam("start") String startDateString,
                                  @DefaultValue("") @QueryParam("end") String endDateString) {
+        //http://localhost:8080/soap_api/webresources/twitter/tweets/0d4b975e-edfc-4ee9-a3d5-a3eff954fe20?token=qwerty&start=2017-10-10%2012%3A00%3A00&end=2017-12-15%2012%3A00%3A00
         Optional<LocalDateTime> start;
         Optional<LocalDateTime> end;
         if (startDateString.equals("")) {
@@ -78,7 +79,7 @@ public class TwitterController {
             end = Optional.of(LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
 
-        return service.getTweets(token, start, end);
+        return service.getTweets(token, userId, start, end);
     }
 
 
@@ -113,8 +114,8 @@ public class TwitterController {
         return service.addCommentToTweet(token, request.getMessage(), request.getOwnerID(), request.getTweetID());
     }
 
-    @POST
-    @Path("/tweet/{id}?comments=true")
+    @GET
+    @Path("/tweet/{id}/comments")
     @Consumes("application/json")
     @Produces("application/json")
     public TweetWithComments getTweetComments(@PathParam("id") String id, @QueryParam("token") String token) {

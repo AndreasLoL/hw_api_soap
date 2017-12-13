@@ -1,6 +1,7 @@
 
 package soap;
 
+import com.sun.xml.ws.developer.SchemaValidation;
 import service.TwitterService;
 
 import com.google.gson.JsonElement;
@@ -28,6 +29,7 @@ import java.util.Optional;
  * Generated source version: 2.2
  *
  */
+@SchemaValidation
 @WebService(name = "TwitterPortType", targetNamespace = "http://veebiteenused.ttu.ee")
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 @XmlSeeAlso({
@@ -113,7 +115,7 @@ public class TwitterPortType {
             endDate = Optional.of(parameter.getEndDate().toGregorianCalendar().toZonedDateTime().toLocalDateTime());
         }
 
-        List<Tweet> tweets = service.getTweets(parameter.getToken(), startDate, endDate);
+        List<Tweet> tweets = service.getTweets(parameter.getToken(), parameter.getUserID(), startDate, endDate);
 
         GetTweetsResponse response = new GetTweetsResponse();
         response.tweets = new GetTweetsResponse.Tweets();
