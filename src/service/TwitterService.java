@@ -30,6 +30,10 @@ public class TwitterService {
 
     public ValidationService validationService;
 
+    public HashMap<String, Tweet> tweetMemory;
+    public HashMap<String, Comment> commentMemory;
+    public HashMap<String, TweetWithComments> tweetWithCommentsMemory;
+
     public TwitterService() {
         connBuilder = r.connection().hostname("localhost").port(28015);
         tokens = new ArrayList<>(Arrays.asList("asd123", "abc123", "qwerty"));
@@ -39,6 +43,10 @@ public class TwitterService {
                 .create();
 
         validationService = new ValidationService();
+
+        tweetMemory = new HashMap<>();
+        commentMemory = new HashMap<>();
+        tweetWithCommentsMemory = new HashMap<>();
     }
 
     private boolean tokenIsValid(String token) {
@@ -60,13 +68,19 @@ public class TwitterService {
 
         if (tokenIsValid(token)) {
 
+            if (tweetMemory.containsKey(id)) {
+                return tweetMemory.get(id);
+            }
+
             Connection conn = connBuilder.connect();
 
             Cursor c = r.db("twitter").table("tweet").filter(r.hashMap("id", id)).run(conn);
             for (Object tweet : c) {
                 JsonElement jsonElement = gson.toJsonTree(tweet);
                 conn.close();
-                return gson.fromJson(jsonElement, Tweet.class);
+                Tweet result = gson.fromJson(jsonElement, Tweet.class);
+                tweetMemory.put(id, result);
+                return result;
             }
         }
 
@@ -91,6 +105,7 @@ public class TwitterService {
             tweet.setOwnerID(ownerId);
 
             conn.close();
+
             return tweet;
         }
 
@@ -100,13 +115,20 @@ public class TwitterService {
     public Comment getComment(String token, String commentId) {
         if (tokenIsValid(token)) {
 
+            if (commentMemory.containsKey(commentId)) {
+                return commentMemory.get(commentId);
+            }
+
             Connection conn = connBuilder.connect();
 
             Cursor c = r.db("twitter").table("comment").filter(r.hashMap("id", commentId)).run(conn);
             for (Object comment : c) {
                 JsonElement jsonElement = gson.toJsonTree(comment);
                 conn.close();
-                return gson.fromJson(jsonElement, Comment.class);
+
+                Comment result = gson.fromJson(jsonElement, Comment.class);
+                commentMemory.put(commentId, result);
+                return result;
             }
         }
         return null;
@@ -230,6 +252,11 @@ public class TwitterService {
             tweetWithComments.setID(tweet.getID());
 
             conn.close();
+
+            if (tweetWithCommentsMemory.containsKey(tweetWithComments.getID())) {
+                tweetWithCommentsMemory.remove(tweetWithComments.getID());
+            }
+
             return tweetWithComments;
         }
 
@@ -238,6 +265,11 @@ public class TwitterService {
 
     public TweetWithComments getTweetComments(String token, String tweetId) {
         if (tokenIsValid(token)) {
+
+            if (tweetWithCommentsMemory.containsKey(tweetId)) {
+                return tweetWithCommentsMemory.get(tweetId);
+            }
+
             Connection conn = connBuilder.connect();
 
             Tweet tweet = getTweet(token, tweetId);
@@ -263,6 +295,8 @@ public class TwitterService {
             tweetWithComments.setID(tweet.getID());
 
             conn.close();
+
+            tweetWithCommentsMemory.put(tweetId, tweetWithComments);
             return tweetWithComments;
         }
 
