@@ -7,10 +7,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,9 +25,6 @@ public class TwitterController {
 
     TwitterService service;
 
-    /**
-     * Creates a new instance of InvoicesResource
-     */
     public TwitterController() {
         service = new TwitterService();
     }
